@@ -15,6 +15,12 @@ class RepoManager extends Storage {
     return (await getStringList(StorageKey.repoman_repoNames))[index];
   }
 
+  @override
+  Future<bool> getBool(StorageKey<bool> key, [bool defaulting = false]) async {
+    if (key == StorageKey.repoman_hasGHSponsorPremium) return true;
+    return super.getBool(key, defaulting);
+  }
+
   Future<void> setOnboardingStep(int step) async {
     if (await getInt(StorageKey.repoman_onboardingStep) == -1) return;
     await setInt(StorageKey.repoman_onboardingStep, step);

@@ -17,7 +17,7 @@ class PremiumManager {
   }
 
   Future<bool> _readPremiumStatus() async {
-    return true;
+    return await repoManager.getBool(StorageKey.repoman_hasGHSponsorPremium);
   }
 
   Future<void> updateGitHubSponsorPremium() async {
