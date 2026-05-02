@@ -6,6 +6,10 @@ on:
       - v*
 
   workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag to create the GitHub Release for (e.g. v1.2.3)'
+        required: true
 
 jobs:
   build:
