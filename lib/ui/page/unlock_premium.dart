@@ -48,7 +48,6 @@ class _UnlockPremiumState extends ConsumerState<UnlockPremium> {
       Navigator.pop(context, true);
     }
     initAsync(() async {
-      await premiumManager.updateGitHubSponsorPremium();
       if (mounted && ref.read(premiumStatusProvider) == true) {
         Navigator.pop(context, true);
       }
@@ -210,7 +209,6 @@ class _UnlockPremiumState extends ConsumerState<UnlockPremium> {
     if (result == null) return;
 
     await repoManager.setStringNullable(StorageKey.repoman_ghSponsorToken, result.$3);
-    await premiumManager.updateGitHubSponsorPremium();
     if (mounted && ref.read(premiumStatusProvider) == true) {
       Navigator.pop(context, true);
     }
