@@ -5,7 +5,6 @@ enum StorageKey<T> {
   // Repo Manager
   repoman_appLocale<String?>(name: "appLocale", defaultValue: null),
   repoman_themeMode<bool?>(name: "themeMode", defaultValue: true),
-  repoman_hasGHSponsorPremium<bool>(name: "hasGHSponsorPremium", defaultValue: false),
   repoman_repoIndex<int>(name: "repoIndex", defaultValue: 0),
   repoman_tileSyncIndex<int>(name: "tileSyncIndex", defaultValue: 0),
   repoman_tileManualSyncIndex<int>(name: "tileManualSyncIndex", defaultValue: 0),
@@ -15,7 +14,6 @@ enum StorageKey<T> {
   repoman_widgetManualSyncIndex<int>(name: "widgetManualSyncIndex", defaultValue: 0),
   repoman_onboardingStep<int>(name: "onboardingStep", defaultValue: 0),
   repoman_erroring<String?>(name: "erroring", defaultValue: null),
-  repoman_ghSponsorToken<String?>(name: "ghSponsorToken", defaultValue: null),
   repoman_repoNames<List<String>>(name: "repoNames", defaultValue: <String>["main"]),
   repoman_showGithubAppRedirectDisclosure<bool>(name: "showGithubAppRedirectDisclosure", defaultValue: true),
   repoman_reportIssueToken<String?>(name: "reportIssueToken", defaultValue: null),

@@ -528,25 +528,6 @@ final aiFeaturesEnabledProvider = AsyncNotifierProvider<AiFeaturesEnabledNotifie
 
 final aiKeyConfiguredProvider = StateProvider<bool>((ref) => false);
 
-class PremiumStatusNotifier extends Notifier<bool?> {
-  @override
-  bool? build() {
-    void listener() {
-      state = premiumManager.hasPremiumNotifier.value;
-    }
-
-    premiumManager.hasPremiumNotifier.addListener(listener);
-    ref.onDispose(() => premiumManager.hasPremiumNotifier.removeListener(listener));
-    return premiumManager.hasPremiumNotifier.value;
-  }
-
-  void set(bool? value) {
-    premiumManager.hasPremiumNotifier.value = value;
-  }
-}
-
-final premiumStatusProvider = NotifierProvider<PremiumStatusNotifier, bool?>(PremiumStatusNotifier.new);
-
 class RemoteNameNotifier extends SettingNotifier<String> {
   @override
   Future<String> read() => uiSettingsManager.getRemote();

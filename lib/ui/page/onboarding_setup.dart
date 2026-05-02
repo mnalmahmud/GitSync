@@ -29,7 +29,6 @@ import 'package:GitSync/ui/component/quick_sync_settings.dart';
 import 'package:GitSync/ui/dialog/github_scoped_guide.dart' as github_scoped_guide;
 import 'package:GitSync/ui/dialog/prominent_disclosure.dart' as ProminentDisclosureDialog;
 import 'package:GitSync/ui/page/clone_repo_main.dart';
-import 'package:GitSync/ui/page/unlock_premium.dart';
 
 class RightAngleLinePainter extends CustomPainter {
   final double animationValue;
@@ -1530,9 +1529,8 @@ class _OnboardingSetup extends ConsumerState<OnboardingSetup> with WidgetsBindin
                         ),
                         child: Builder(
                           builder: (context) {
-                            final hasPremium = ref.watch(premiumStatusProvider);
                             return Text(
-                              (hasPremium == true ? t.continueLabel : t.onboardingPremiumFeatures).toUpperCase(),
+                              t.continueLabel.toUpperCase(),
                               style: TextStyle(
                                 color: colours.secondaryDark,
                                 fontWeight: FontWeight.bold,
@@ -1544,9 +1542,6 @@ class _OnboardingSetup extends ConsumerState<OnboardingSetup> with WidgetsBindin
                         ),
                         onPressed: () async {
                           await _controller.reverse();
-                          if (context.mounted) {
-                            await Navigator.of(context).push(createUnlockPremiumRoute(context, {"onboarding": true}));
-                          }
                           if (mounted) {
                             await showNotificationsOrNext();
                           }

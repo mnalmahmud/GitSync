@@ -62,7 +62,6 @@ import '../ui/dialog/author_details_prompt.dart' as AuthorDetailsPromptDialog;
 import '../ui/dialog/add_container.dart' as AddContainerDialog;
 import '../ui/dialog/remove_container.dart' as RemoveContainerDialog;
 import '../ui/dialog/rename_container.dart' as RenameContainerDialog;
-import 'package:GitSync/ui/page/unlock_premium.dart';
 import 'ui/dialog/confirm_force_push_pull.dart' as ConfirmForcePushPullDialog;
 import '../ui/dialog/force_push_pull.dart' as ForcePushPullDialog;
 import '../ui/dialog/manual_sync.dart' as ManualSyncDialog;
@@ -122,8 +121,6 @@ Future<void> main() async {
       });
       initLogger("${(await getTemporaryDirectory()).path}/logs", maxFileCount: 50, maxFileLength: 1 * 1024 * 1024);
       await uiSettingsManager.reinit();
-      // Loads premiumManager initial state
-      initAsync(() async => await premiumManager.init());
       runApp(const ProviderScope(child: MyApp()));
     },
     (error, stackTrace) {
@@ -856,22 +853,12 @@ class _MyHomePageState extends ConsumerState<MyHomePage> with WidgetsBindingObse
     },
   );
 
-  late final _restorableUnlockPremium = RestorableRouteFuture<bool?>(
-    onPresent: (navigator, arguments) {
-      return navigator.restorablePush(createUnlockPremiumRoute, arguments: arguments);
-    },
-    onComplete: (result) {
-      reloadAll();
-    },
-  );
-
   @override
   String get restorationId => 'homepage';
   @override
   void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
     registerForRestoration(_restorableGlobalSettings, global_settings_main);
     registerForRestoration(_restorableOnboardingSetup, onboarding_setup);
-    registerForRestoration(_restorableUnlockPremium, unlock_premium);
     registerForRestoration(mergeConflictVisible, 'mergeConflictVisible');
   }
 
@@ -1066,7 +1053,6 @@ class _MyHomePageState extends ConsumerState<MyHomePage> with WidgetsBindingObse
 
     // TODO: Make sure this is commented for release
     // repoManager.set(StorageKey.repoman_hasStorePremium, false);
-    // repoManager.set(StorageKey.repoman_hasGHSponsorPremium, false);
     // repoManager.set(StorageKey.repoman_hasEnhancedScheduledSync, false);
     // uiSettingsManager.set(StorageKey.setman_schedule, "never|");
 
@@ -1170,19 +1156,6 @@ class _MyHomePageState extends ConsumerState<MyHomePage> with WidgetsBindingObse
       _tabIndex.value = 0;
       _pageController.animateToPage(0, duration: Duration(milliseconds: 300), curve: Curves.easeInOut);
     };
-
-    initAsync(() async {
-      if (premiumManager.hasPremiumNotifier.value == false) {
-        await premiumManager.cullNonPremium();
-        await reloadAll();
-      }
-    });
-
-    premiumManager.hasPremiumNotifier.addListener(() async {
-      if (premiumManager.hasPremiumNotifier.value == false && await premiumManager.cullNonPremium()) {
-        await reloadAll();
-      }
-    });
 
     FlutterBackgroundService().on(GitsyncService.MERGE_COMPLETE).listen((event) async {
       Navigator.of(context).canPop() ? Navigator.pop(context) : null;
@@ -1612,7 +1585,6 @@ class _MyHomePageState extends ConsumerState<MyHomePage> with WidgetsBindingObse
 
     mergeConflictVisible.dispose();
 
-    premiumManager.dispose();
     _pulseController.dispose();
     _commitSelectMode.dispose();
     _commitSelectedShas.dispose();
@@ -1894,23 +1866,9 @@ class _MyHomePageState extends ConsumerState<MyHomePage> with WidgetsBindingObse
                   featureRows: [
                     ShowcaseFeatureRow(icon: FontAwesomeIcons.solidFolderOpen, text: t.showcaseAddMoreFeatureSwitch),
                     ShowcaseFeatureRow(icon: FontAwesomeIcons.squarePen, text: t.showcaseAddMoreFeatureManage),
-                    ShowcaseFeatureRow(icon: FontAwesomeIcons.solidGem, text: t.showcaseAddMoreFeaturePremium),
                   ],
                 ),
-                customTooltipActions: [
-                  TooltipActionButton(
-                    backgroundColor: colours.secondaryInfo,
-                    textStyle: TextStyle(fontWeight: FontWeight.bold, fontSize: textSM, color: colours.primaryLight),
-                    leadIcon: ActionButtonIcon(
-                      icon: FaIcon(FontAwesomeIcons.solidFileLines, color: colours.primaryLight, size: textSM),
-                    ),
-                    name: t.learnMore.toUpperCase(),
-                    onTap: () => launchUrl(Uri.parse(premiumDocsLink)),
-                    type: null,
-                    borderRadius: BorderRadius.all(cornerRadiusMD),
-                    padding: EdgeInsets.symmetric(horizontal: spaceMD, vertical: spaceXS),
-                  ),
-                ],
+                customTooltipActions: const [],
                 child: ProviderBuilder<List<String>>(
                   provider: repoNamesProvider,
                   builder: (context, repoNamesAsync) => Container(
@@ -1930,23 +1888,6 @@ class _MyHomePageState extends ConsumerState<MyHomePage> with WidgetsBindingObse
                                     padding: WidgetStatePropertyAll(EdgeInsets.symmetric(horizontal: spaceXS, vertical: spaceXS)),
                                   ),
                                   onPressed: () async {
-                                    if (demo) {
-                                      final result = await Navigator.of(context).push(createUnlockPremiumRoute(context, {}));
-                                      if (result == true) {
-                                        if (mounted) setState(() {});
-                                      }
-                                    }
-
-                                    if (premiumManager.hasPremiumNotifier.value != true) {
-                                      final result = await Navigator.of(context).push(createUnlockPremiumRoute(context, {}));
-                                      if (result == true) {
-                                        if (mounted) setState(() {});
-                                        await addRepo();
-                                      }
-                                      if (mounted) setState(() {});
-                                      return;
-                                    }
-
                                     if (repoNamesAsync.valueOrNull!.length == 1 || repoSettingsExpanded) {
                                       addRepo();
                                       return;
@@ -1968,19 +1909,14 @@ class _MyHomePageState extends ConsumerState<MyHomePage> with WidgetsBindingObse
                                   },
                                   child: Row(
                                     children: [
-                                      ValueListenableBuilder(
-                                        valueListenable: premiumManager.hasPremiumNotifier,
-                                        builder: (context, hasPremium, child) => FaIcon(
-                                          hasPremium == true
-                                              ? (repoNamesAsync.valueOrNull!.length == 1 || repoSettingsExpanded
-                                                    ? FontAwesomeIcons.solidSquarePlus
-                                                    : FontAwesomeIcons.ellipsis)
-                                              : FontAwesomeIcons.solidGem,
-                                          color: repoNamesAsync.valueOrNull!.length == 1 || repoSettingsExpanded
-                                              ? colours.tertiaryPositive
-                                              : colours.secondaryLight,
-                                          size: textLG,
-                                        ),
+                                      FaIcon(
+                                        repoNamesAsync.valueOrNull!.length == 1 || repoSettingsExpanded
+                                            ? FontAwesomeIcons.solidSquarePlus
+                                            : FontAwesomeIcons.ellipsis,
+                                        color: repoNamesAsync.valueOrNull!.length == 1 || repoSettingsExpanded
+                                            ? colours.tertiaryPositive
+                                            : colours.secondaryLight,
+                                        size: textLG,
                                       ),
                                       repoNamesAsync.valueOrNull!.length != 1
                                           ? SizedBox.shrink()
@@ -4054,10 +3990,6 @@ class _MyHomePageState extends ConsumerState<MyHomePage> with WidgetsBindingObse
                                                               ShowcaseFeatureRow(
                                                                 icon: FontAwesomeIcons.barsStaggered,
                                                                 text: t.showcaseAutoSyncFeatureQuick,
-                                                              ),
-                                                              ShowcaseFeatureRow(
-                                                                icon: FontAwesomeIcons.solidGem,
-                                                                text: t.showcaseAutoSyncFeaturePremium,
                                                               ),
                                                             ],
                                                           ),

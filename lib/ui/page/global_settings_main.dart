@@ -25,7 +25,6 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:showcaseview/showcaseview.dart';
-import 'package:GitSync/ui/page/unlock_premium.dart';
 import 'package:sprintf/sprintf.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../api/helper.dart';
@@ -590,16 +589,6 @@ class _GlobalSettingsMain extends ConsumerState<GlobalSettingsMain> with Widgets
                             Navigator.of(context).canPop() ? Navigator.pop(context) : null;
                           }
 
-                          if (settingsManagerSettings.length > 1) {
-                            if (ref.read(premiumStatusProvider) != true) {
-                              final result = await Navigator.of(context).push(createUnlockPremiumRoute(context, {}));
-                              if (result == true) {
-                                await importSettings();
-                              }
-                              return;
-                            }
-                          }
-
                           await importSettings();
                         });
                       },
@@ -944,22 +933,12 @@ class _GlobalSettingsMain extends ConsumerState<GlobalSettingsMain> with Widgets
                       ),
                     ),
                     SizedBox(height: spaceSM),
-                    Builder(
-                      builder: (context) {
-                        final hasPremium = ref.watch(premiumStatusProvider);
-                        return ButtonSetting(
-                          text: (hasPremium == true ? t.contributeTitle : t.premiumDialogTitle).toUpperCase(),
-                          icon: hasPremium == true ? FontAwesomeIcons.circleDollarToSlot : FontAwesomeIcons.solidGem,
-                          iconColor: colours.tertiaryPositive,
-                          onPressed: () async {
-                            if (hasPremium == true) {
-                              await launchUrl(Uri.parse(contributeLink));
-                            } else {
-                              final result = await Navigator.of(context).push(createUnlockPremiumRoute(context, {}));
-                              if (result == true && mounted) setState(() {});
-                            }
-                          },
-                        );
+                    ButtonSetting(
+                      text: t.contributeTitle.toUpperCase(),
+                      icon: FontAwesomeIcons.circleDollarToSlot,
+                      iconColor: colours.tertiaryPositive,
+                      onPressed: () async {
+                        await launchUrl(Uri.parse(contributeLink));
                       },
                     ),
                     SizedBox(height: spaceMD),
@@ -1021,7 +1000,6 @@ class _GlobalSettingsMain extends ConsumerState<GlobalSettingsMain> with Widgets
                           await uiSettingsManager.storage.deleteAll();
                           await repoManager.storage.deleteAll();
                           await uiSettingsManager.reinit();
-                          ref.read(premiumStatusProvider.notifier).set(false);
 
                           Navigator.of(context).canPop() ? Navigator.pop(context) : null;
                         });
