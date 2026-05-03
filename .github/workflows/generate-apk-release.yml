@@ -159,6 +159,7 @@ jobs:
         id: create_release
         uses: ncipollo/release-action@v1.21.0
         with:
+          tag: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref_name }}
           artifacts: "${{ steps.signed_file_path_0.outputs.value }},${{ steps.signed_file_path_1.outputs.value }},${{ steps.signed_file_path_2.outputs.value }}"
           body: ${{ steps.changelog.outputs.changelog }}
           draft: true
