@@ -17,12 +17,13 @@ class PremiumManager {
   }
 
   Future<bool> _readPremiumStatus() async {
-    return
+    return truw;
     // kDebugMode ||
-    await repoManager.getBool(StorageKey.repoman_hasGHSponsorPremium);
+    // await repoManager.getBool(StorageKey.repoman_hasGHSponsorPremium);
   }
 
   Future<void> updateGitHubSponsorPremium() async {
+    return;
     if (!await hasNetworkConnection()) {
       return;
     }

@@ -6,6 +6,10 @@ on:
       - v*
 
   workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag to create the GitHub Release for (e.g. v1.2.3)'
+        required: true
 
 jobs:
   build:
@@ -82,9 +86,9 @@ jobs:
           export SOURCE_DATE_EPOCH=$(git log -1 --pretty=%ct)
           # Build each ABI in its own gradle invocation so the gradle task graph
           # matches F-Droid (which builds one ABI per metadata entry job).
-          flutter build apk --release --split-per-abi --target-platform="android-arm"
+          # flutter build apk --release --split-per-abi --target-platform="android-arm"
           flutter build apk --release --split-per-abi --target-platform="android-arm64"
-          flutter build apk --release --split-per-abi --target-platform="android-x64"
+          # flutter build apk --release --split-per-abi --target-platform="android-x64"
 
       - name: Sign App
         id: sign_app
@@ -163,10 +167,11 @@ jobs:
         id: create_release
         uses: ncipollo/release-action@v1.21.0
         with:
+          tag: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref_name }}
           artifacts: "${{ steps.signed_file_path_0.outputs.value }},${{ steps.signed_file_path_1.outputs.value }},${{ steps.signed_file_path_2.outputs.value }}"
           body: ${{ steps.changelog.outputs.changelog }}
           draft: true
           generateReleaseNotes: true
           generateReleaseNotesPreviousTag: ${{ steps.previous_tag.outputs.previous_tag }}
-          name: Release ${{ github.ref_name }}
+          name: Release ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.tag || github.ref_name }}
           token: ${{ secrets.GITHUB_TOKEN }}
