@@ -241,8 +241,8 @@ Future<void> showDialog(BuildContext parentContext, List<(String, GitManagerRs.C
       final midIdx = lines.indexWhere((line) => line.contains(conflictSeparator));
       final endIdx = lines.indexWhere((line) => line.contains(conflictEnd));
 
-      final remoteLines = lines.sublist(startIdx + 1, midIdx).indexed;
-      final localLines = lines.sublist(midIdx + 1, endIdx).indexed;
+      final localLines = lines.sublist(startIdx + 1, midIdx).indexed;
+      final remoteLines = lines.sublist(midIdx + 1, endIdx).indexed;
 
       conflictSections.removeAt(i);
       if (mode == 'local') {
@@ -497,7 +497,7 @@ Future<void> showDialog(BuildContext parentContext, List<(String, GitManagerRs.C
                                         ),
                                       ),
                                       child: Text(
-                                        t.allLocal.toUpperCase(),
+                                        t.allCurrent.toUpperCase(),
                                         style: TextStyle(color: colours.tertiaryInfo, fontWeight: FontWeight.bold, fontSize: textXS),
                                       ),
                                     ),
@@ -541,7 +541,7 @@ Future<void> showDialog(BuildContext parentContext, List<(String, GitManagerRs.C
                                         ),
                                       ),
                                       child: Text(
-                                        t.allRemote.toUpperCase(),
+                                        t.allIncoming.toUpperCase(),
                                         style: TextStyle(color: colours.tertiaryWarning, fontWeight: FontWeight.bold, fontSize: textXS),
                                       ),
                                     ),
@@ -576,8 +576,8 @@ Future<void> showDialog(BuildContext parentContext, List<(String, GitManagerRs.C
                                                   final midIndex = lines.indexWhere((line) => line.contains(conflictSeparator));
                                                   final endIndex = lines.indexWhere((line) => line.contains(conflictEnd));
 
-                                                  final remoteLines = lines.sublist(startIndex + 1, midIndex).indexed;
-                                                  final localLines = lines.sublist(midIndex + 1, endIndex).indexed;
+                                                  final localLines = lines.sublist(startIndex + 1, midIndex).indexed;
+                                                  final remoteLines = lines.sublist(midIndex + 1, endIndex).indexed;
 
                                                   return AnchorItemWrapper(
                                                     key: Key("${item.$1}//${item.$2}"),
@@ -703,7 +703,7 @@ Future<void> showDialog(BuildContext parentContext, List<(String, GitManagerRs.C
                                                                           ),
                                                                         ),
                                                                         child: Text(
-                                                                          t.local.toUpperCase(),
+                                                                           t.current.toUpperCase(),
                                                                           style: TextStyle(color: colours.secondaryDark, fontWeight: FontWeight.bold),
                                                                         ),
                                                                       ),
@@ -768,7 +768,7 @@ Future<void> showDialog(BuildContext parentContext, List<(String, GitManagerRs.C
                                                                           ),
                                                                         ),
                                                                         child: Text(
-                                                                          t.remote.toUpperCase(),
+                                                                           t.incoming.toUpperCase(),
                                                                           style: TextStyle(color: colours.secondaryDark, fontWeight: FontWeight.bold),
                                                                         ),
                                                                       ),

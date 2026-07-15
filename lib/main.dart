@@ -825,7 +825,10 @@ class _MyHomePageState extends ConsumerState<MyHomePage> with WidgetsBindingObse
 
   Future<void> _openSettingsMain({bool showcaseAuthorDetails = false}) async {
     await _homeNavigatorKey.currentState?.push<String?>(
-      createSettingsMainRoute(_homeNavigatorKey.currentContext!, {"showcaseAuthorDetails": showcaseAuthorDetails}),
+      createSettingsMainRoute(_homeNavigatorKey.currentContext!, {
+        "showcaseAuthorDetails": showcaseAuthorDetails,
+        "openGlobalSettings": () => _restorableGlobalSettings.present({}),
+      }),
     );
     reloadAll();
   }
@@ -2052,7 +2055,7 @@ class _MyHomePageState extends ConsumerState<MyHomePage> with WidgetsBindingObse
                                                   if (text.isEmpty) return;
 
                                                   final repomanReponames = await repoManager.getStringList(StorageKey.repoman_repoNames);
-                                                  uiSettingsManager.renameNamespace(text);
+                                                  await uiSettingsManager.renameNamespace(text);
                                                   repomanReponames[await repoManager.getInt(StorageKey.repoman_repoIndex)] = text;
 
                                                   await repoManager.setStringList(StorageKey.repoman_repoNames, repomanReponames);
@@ -2934,10 +2937,10 @@ class _MyHomePageState extends ConsumerState<MyHomePage> with WidgetsBindingObse
                                                                                               style: TextStyle(
                                                                                                 color: gitDirPath?.$2 == null
                                                                                                     ? colours.secondaryLight
-                                    : (recommendedActionValue != null &&
-                                              recommendedActionValue >= 0
-                                          ? colours.tertiaryInfo
-                                          : colours.primaryLight),
+                                                                                                    : (recommendedActionValue != null &&
+                                                                                                              recommendedActionValue >= 0
+                                                                                                          ? colours.tertiaryInfo
+                                                                                                          : colours.primaryLight),
                                                                                                 fontSize: textMD,
                                                                                                 fontWeight: FontWeight.bold,
                                                                                               ),
@@ -3775,8 +3778,7 @@ class _MyHomePageState extends ConsumerState<MyHomePage> with WidgetsBindingObse
 
                                                                         Consumer(
                                                                           builder: (context, ref, _) =>
-                                                                              !((ref.watch(gitProviderProvider).valueOrNull ?? GitProvider.GITHUB) ==
-                                                                                      GitProvider.GITHUB &&
+                                                                              !(ref.watch(gitProviderProvider).valueOrNull == GitProvider.GITHUB &&
                                                                                   (ref.watch(githubScopedOauthProvider).valueOrNull ?? false))
                                                                               ? SizedBox.shrink()
                                                                               : IconButton(
